@@ -12,6 +12,8 @@ import static org.bytedeco.opencv.global.opencv_imgproc.equalizeHist;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.IntBuffer;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -23,9 +25,13 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import com.project.jafet.framework.Constants;
-import com.project.jafet.framework.fr.model.Sequence;
+import com.project.jafet.framework.exception.AddFacialDataException;
+import com.project.jafet.framework.exception.FaceRecognizerException;
 import com.project.jafet.framework.fr.model.TestRequestModel;
+import com.project.jafet.framework.fr.model.utils.FaceRecognizerResponse;
+import com.project.jafet.framework.fr.util.FaceRecognizerUtils;
 import com.project.jafet.framework.req.model.AddUserRequest;
+import com.project.jafet.framework.req.model.StudentModel;
 import com.project.jafet.framework.services.ImageProcessor;
 
 public class FaceRecognizer {
@@ -40,7 +46,7 @@ public class FaceRecognizer {
 	        FilenameFilter imgFilter = new FilenameFilter() {
 	            public boolean accept(File dir, String name) {
 	                name = name.toLowerCase();
-	                return name.endsWith(".jpg") || name.endsWith(".pgm") || name.endsWith(".png");
+	                return name.endsWith(".jpg") || name.endsWith(".jpg") || name.endsWith(".png");
 	            }
 	        };
 
@@ -48,10 +54,10 @@ public class FaceRecognizer {
 
 	        MatVector images = new MatVector(imageFiles.length);
 	        
-	        Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
-	        IntBuffer labelsBuf = labels.createBuffer();
+	        //Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
+	        //IntBuffer labelsBuf = labels.createBuffer();
 	        
-	        int counter = 0;
+	        //int counter = 0;
 	        
 	        for (File image : imageFiles) {
 	            Mat img = imread(image.getAbsolutePath(), IMREAD_COLOR);//IMREAD_GRAYSCALE
@@ -102,6 +108,24 @@ public class FaceRecognizer {
 		}
 	}
 	
+	public static boolean updateModelAddUserWithLabel(List<String> images64, int label) throws Exception {
+		try {
+			List<Mat> images = new ArrayList<>();
+			List<Integer> labels = new ArrayList<>();
+			for(String image64 : images64) {
+				File inputFile = ImageProcessor.convertBase64ToFile(image64);
+				Mat imgMat = imread(inputFile.getAbsolutePath(), IMREAD_GRAYSCALE);
+				images.add(imgMat);
+				labels.add(label);
+				inputFile.delete();
+			}
+			updateModelWithHaarCascade(images, labels);
+		}catch(Exception e) {
+			throw new AddFacialDataException("Error adding facial data "+e.getMessage());
+		}
+		return true;
+	}
+	
 	public static void updateModelForFace(AddUserRequest addUserReq, int seqVal) {
 		try {
 			if(addUserReq.getImages() != null) {
@@ -117,17 +141,31 @@ public class FaceRecognizer {
 		}
 	}
 	
-	public static void recognize(TestRequestModel tReqModel) {
+	public static FaceRecognizerResponse recognize(TestRequestModel tReqModel) throws FaceRecognizerException {
 		try {
             File inputFile = ImageProcessor.convertBase64ToFile(tReqModel.reqImg);
 			Mat imgMat = imread(inputFile.getAbsolutePath());
-			haarCascade(imgMat);
+			return haarCascade(imgMat);
 		}catch(Exception e) {
 			e.printStackTrace();
+			throw new FaceRecognizerException("Error occured while recognizing "+e.getMessage());
 		}
 	}
 	
-	private static void haarCascade(Mat imgMat) {
+	public static FaceRecognizerResponse recognize(StudentModel studentModel) throws FaceRecognizerException {
+		try {
+            File inputFile = ImageProcessor.convertBase64ToFile(studentModel.getImages().get(0));
+			Mat imgMat = imread(inputFile.getAbsolutePath());
+			return haarCascade(imgMat);
+		}catch(Exception e) {
+			e.printStackTrace();
+			throw new FaceRecognizerException("Error occured while recognizing "+e.getMessage());
+		}
+	}
+	
+	private static FaceRecognizerResponse haarCascade(Mat imgMat) {
+		
+		FaceRecognizerResponse faceRecognizerResponse = new FaceRecognizerResponse();
 		
 		CascadeClassifier face_cascade = new CascadeClassifier(Constants.HAAR_CLASSIFIER);
 		org.bytedeco.opencv.opencv_face.FaceRecognizer faceRecognizer = LBPHFaceRecognizer.create();
@@ -158,10 +196,12 @@ public class FaceRecognizer {
         
         faceRecognizer.train(images, labels);
         
+        String fileName = FaceRecognizerUtils.getRandomFileName();
+        
         for(int i =0; i < images.size(); i++) {
         	Mat img = images.get(i);
         	org.bytedeco.opencv.global.opencv_imgproc.rectangle(img, faces.get(i), new Scalar(0, 255, 0, 1));
-        	org.bytedeco.opencv.global.opencv_imgcodecs.imwrite("faceWithRect"+(Math.random()*100)+".png", img);
+        	org.bytedeco.opencv.global.opencv_imgcodecs.imwrite(fileName, img);
         }
         
         for(int i=0; i < faces.size(); i++) {
@@ -174,9 +214,18 @@ public class FaceRecognizer {
 	        // Retrieve recognized user ID
 	        int recognizedUserId = label.get(0);
 	        double confidenceValue = confidence.get(0);
+	        
+	        if(confidenceValue >= Constants.RECOGNITION_PRECISION) {
+		        faceRecognizerResponse.setConfidenceValue(confidenceValue);
+		        faceRecognizerResponse.setLabelId(recognizedUserId);
+		        faceRecognizerResponse.setHaarDetectedImg(fileName);	
+	        }
+	        
             System.out.println("recognizedUserId "+recognizedUserId+" confidenceValue "+confidenceValue);
         }
         face_cascade.close();
+        
+        return faceRecognizerResponse;
 	}
 	
 	private static void updateModelWithHaarCascade(Mat image, int seqVal) {
@@ -196,34 +245,22 @@ public class FaceRecognizer {
         faceRecognizer.save(Constants.TRAINED_MODEL);
 	}
 	
-	private static void cascadeTrain(org.bytedeco.opencv.opencv_face.FaceRecognizer faceRecognizer,Mat imgMat, int label) {
-		CascadeClassifier face_cascade = new CascadeClassifier(Constants.HAAR_CLASSIFIER);
+	
+	private static void updateModelWithHaarCascade(List<Mat> images, List<Integer> labels) {
+		MatVector faceImageVectors = new MatVector(images.size());
+		Mat matLabelBuffer = new Mat(labels.size(), 1, CV_32SC1);
+		IntBuffer labelsBuffer = matLabelBuffer.createBuffer();
 		
-		Mat videoMatGray = new Mat();
+		for(int i=0; i < images.size(); i++) {
+			faceImageVectors.put(i, images.get(i));
+			labelsBuffer.put(i,labels.get(i));
+		}
 		
-		cvtColor(imgMat, videoMatGray, COLOR_BGRA2GRAY);	
-		equalizeHist(videoMatGray, videoMatGray);
-		
-        RectVector faces = new RectVector();
-        // Find the faces in the frame:
-        face_cascade.detectMultiScale(videoMatGray, faces); 
-        
-        int size = (int) faces.size();
-        
-        MatVector images = new MatVector(size);
-        Mat labels = new Mat(size, 1, CV_32SC1);
-        
-        IntBuffer labelsBuf = labels.createBuffer();
-        
-        for(int i = 0; i < faces.size(); i++) {
-        	Rect faceRect = faces.get(i);
-        	Mat faceImg = new Mat(videoMatGray, faceRect);
-        	images.put(i,faceImg);
-        	labelsBuf.put(i,1000);
-        }
-        
-        faceRecognizer.train(images, labels);
-        face_cascade.close();
-	}
+		org.bytedeco.opencv.opencv_face.FaceRecognizer faceRecognizer = LBPHFaceRecognizer.create();
+        faceRecognizer.read(Constants.TRAINED_MODEL);
 
+        
+        faceRecognizer.update(faceImageVectors, matLabelBuffer);
+        faceRecognizer.save(Constants.TRAINED_MODEL);
+	}
 }
