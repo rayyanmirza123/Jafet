@@ -11,6 +11,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.equalizeHist;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.List;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ import com.project.jafet.framework.services.ImageProcessor;
 
 public class FaceRecognizer {
 	
-	public static void train(int label) {
+	public static void train() {
 		try {
 			CascadeClassifier face_cascade = new CascadeClassifier(Constants.HAAR_CLASSIFIER);
 	        org.bytedeco.opencv.opencv_face.FaceRecognizer faceRecognizer = LBPHFaceRecognizer.create();
@@ -46,7 +47,7 @@ public class FaceRecognizer {
 	        FilenameFilter imgFilter = new FilenameFilter() {
 	            public boolean accept(File dir, String name) {
 	                name = name.toLowerCase();
-	                return name.endsWith(".jpg") || name.endsWith(".jpg") || name.endsWith(".png");
+	                return name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png");
 	            }
 	        };
 
@@ -54,12 +55,21 @@ public class FaceRecognizer {
 
 	        MatVector images = new MatVector(imageFiles.length);
 	        
-	        //Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
-	        //IntBuffer labelsBuf = labels.createBuffer();
+	        Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
+	        IntBuffer labelsBuf = labels.createBuffer();
 	        
-	        //int counter = 0;
+	        int counter = 0;
 	        
 	        for (File image : imageFiles) {
+	        	String fileName = image.getAbsolutePath().substring(image.getAbsolutePath().lastIndexOf("\\")+1);
+	        	
+	        	String ext = fileName.substring(fileName.lastIndexOf("."), fileName.length());
+	        	fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+	        	
+	        	String[] labelAndFile = fileName.split("_");
+	        	
+	        	Integer label = Integer.valueOf(labelAndFile[1]);
+	        	
 	            Mat img = imread(image.getAbsolutePath(), IMREAD_COLOR);//IMREAD_GRAYSCALE
 	            Mat videoMatGray = new Mat();
 	    		
@@ -79,16 +89,16 @@ public class FaceRecognizer {
 		            	}
 		            	Mat faceImg = new Mat(videoMatGray, faceRect);
 		            	//org.bytedeco.opencv.global.opencv_imgproc.rectangle(faceImg,faceRect, new Scalar(0, 255, 0, 1));
-		            	org.bytedeco.opencv.global.opencv_imgcodecs.imwrite("faceWithRect"+(Math.random()*100)+".png", faceImg);
-		            	//images.put(counter,faceImg);
-		            	//labelsBuf.put(counter,label);
-		            	//counter++;
+		            	org.bytedeco.opencv.global.opencv_imgcodecs.imwrite("faceWithRect"+(Math.random()*100)+ext, faceImg);
+		            	images.put(counter,faceImg);
+		            	labelsBuf.put(counter,label);
+		            	counter++;
 		            }
 	            }
 	        }
 	        
-	        //faceRecognizer.train(images,labels);
-	        //faceRecognizer.save(Constants.TRAINED_MODEL);
+	        faceRecognizer.train(images,labels);
+	        faceRecognizer.save(Constants.TRAINED_MODEL);
 	        
 	        images.close();
 	        faceRecognizer.close();
@@ -257,6 +267,20 @@ public class FaceRecognizer {
 		}
 		
 		org.bytedeco.opencv.opencv_face.FaceRecognizer faceRecognizer = LBPHFaceRecognizer.create();
+		
+		File model = new File(Constants.TRAINED_MODEL);
+		
+		if(!model.exists()) {
+			try {
+				model.createNewFile();
+				model.setWritable(true);
+				model.setReadable(true);
+				model.setExecutable(true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
         faceRecognizer.read(Constants.TRAINED_MODEL);
 
         

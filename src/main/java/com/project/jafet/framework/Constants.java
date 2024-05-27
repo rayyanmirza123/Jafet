@@ -4,9 +4,9 @@ public class Constants {
 
 	public static final String TRAINED_MODEL="C:/Users/rayya/Downloads/lbphModel.xml";
 	
-	public static final String HAAR_CLASSIFIER = "C:/Users/rayya/Downloads/opencv/build/etc/haarcascades/haarcascade_frontalface_default.xml";
+	public static final String HAAR_CLASSIFIER = "C:\\Users\\rayya\\Downloads\\opencv\\build\\etc\\lbpcascades\\lbpcascade_frontalface.xml";
 	
-	public static final String TRAINING_DATA="C:/Users/rayya/Downloads/FaceRecData/Local/";
+	public static final String TRAINING_DATA="C:/Users/rayya/Downloads/FaceRecData/Combined/";
 	
 	public static final String FACE_SEQ = "FACE_LABEL";
 	

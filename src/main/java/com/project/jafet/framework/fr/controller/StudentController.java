@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.jafet.framework.Constants;
 import com.project.jafet.framework.fr.FaceRecognizer;
+import com.project.jafet.framework.fr.crud.SequenceCRUD;
 import com.project.jafet.framework.fr.crud.StudentCRUD;
 import com.project.jafet.framework.fr.util.FaceEntityUtil;
 import com.project.jafet.framework.fr.util.SequenceUtil;
@@ -22,10 +23,13 @@ public class StudentController {
 	@Autowired
 	StudentCRUD studentCrud;
 	
+	@Autowired
+	SequenceCRUD sequenceCrud;
+	
 	@PostMapping("/add_student")
 	@CrossOrigin(origins = "http://localhost:3000")
 	CommonResponse addStudent(@RequestBody StudentModel student) {
-		Integer studentId = SequenceUtil.getSequencer().getNextSeq(Constants.STUDENT_SEQ);
+		Integer studentId = SequenceUtil.getSequencer(sequenceCrud).getNextSeq(Constants.STUDENT_SEQ);
 		try {
 			boolean isSuccess = FaceRecognizer.updateModelAddUserWithLabel(student.images, studentId);
 			if(isSuccess) {

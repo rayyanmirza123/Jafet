@@ -1,14 +1,11 @@
 package com.project.jafet.framework.fr.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.project.jafet.framework.fr.crud.SequenceCRUD;
 import com.project.jafet.framework.fr.model.Sequence;
 
 public class SequenceUtil {
 	
-	@Autowired
-	SequenceCRUD sequenceCrud;
+	private SequenceCRUD sequenceCrud;
 	
 	private static SequenceUtil sequenceUtil;
 	
@@ -16,11 +13,11 @@ public class SequenceUtil {
 		
 	}
 	
-	public static SequenceUtil getSequencer() {
+	public static SequenceUtil getSequencer(SequenceCRUD sequenceCrud) {
 		if(sequenceUtil == null) {
 			sequenceUtil = new SequenceUtil();
 		}
-		
+		sequenceUtil.sequenceCrud = sequenceCrud;
 		return sequenceUtil;
 	}
 	
@@ -34,7 +31,7 @@ public class SequenceUtil {
 		
 		sequenceCrud.save(sequence);
 		
-		return label+10;
+		return label;
 		
 	}
 	
