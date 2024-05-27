@@ -15,4 +15,10 @@ public class FaceRecognizerResponse {
 	
 	private String haarDetectedImg;
 	
+	
+	@Override
+	public String toString() {
+		return String.valueOf(confidenceValue);
+	}
+	
 }
