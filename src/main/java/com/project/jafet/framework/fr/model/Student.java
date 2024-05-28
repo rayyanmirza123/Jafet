@@ -30,6 +30,10 @@ public class Student {
 	  
 	  private String faceEntityId;
 	  
+	  private String semester;
+	  
+	  private String course;
+	  
 	  @GeneratedValue(strategy = GenerationType.AUTO)
 	  private Integer rollNumber;
 	  

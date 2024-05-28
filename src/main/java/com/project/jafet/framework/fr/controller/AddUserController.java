@@ -26,7 +26,7 @@ public class AddUserController {
 	SequenceCRUD sequenceCrud;
 	
 	@PostMapping("add_user")
-	@CrossOrigin(origins = "http://localhost:3000")
+	@CrossOrigin(origins = "https://a970-122-162-144-230.ngrok-free.app")
 	CommonResponse addUser(@RequestBody AddUserRequest addUserReq) {
 		int seq = SequenceUtil.getSequencer(sequenceCrud).getNextSeq(Constants.FACE_SEQ);
 		FaceRecognizer.updateModelForFace(addUserReq, seq);

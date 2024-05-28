@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.jafet.framework.Constants;
 import com.project.jafet.framework.fr.FaceRecognizer;
+import com.project.jafet.framework.fr.crud.FaceEntityCRUD;
 import com.project.jafet.framework.fr.crud.SequenceCRUD;
 import com.project.jafet.framework.fr.crud.StudentCRUD;
+import com.project.jafet.framework.fr.model.Student;
 import com.project.jafet.framework.fr.util.FaceEntityUtil;
 import com.project.jafet.framework.fr.util.SequenceUtil;
 import com.project.jafet.framework.req.model.StudentModel;
@@ -26,6 +28,9 @@ public class StudentController {
 	@Autowired
 	SequenceCRUD sequenceCrud;
 	
+	@Autowired
+	FaceEntityCRUD faceEntityCrud;
+	
 	@PostMapping("/add_student")
 	@CrossOrigin(origins = "http://localhost:3000")
 	CommonResponse addStudent(@RequestBody StudentModel student) {
@@ -33,9 +38,22 @@ public class StudentController {
 		try {
 			boolean isSuccess = FaceRecognizer.updateModelAddUserWithLabel(student.images, studentId);
 			if(isSuccess) {
-				FaceEntityUtil.getFaceEntityUtil().saveFaceEntity(student.getImages(), studentId, student.getFirstName());
+	//			FaceEntityUtil.getFaceEntityUtil(faceEntityCrud).saveFaceEntity(student.getImages(), studentId, student.getFirstName());
 				student.setFaceEntityId(String.valueOf(studentId));
-				studentCrud.save(student);
+
+				Student newStudent = new Student();
+
+				newStudent.setCourse(student.getCourse());
+				newStudent.setEmailId(student.getEmailId());
+				newStudent.setFirstName(student.getFirstName());
+				newStudent.setLastName(student.getLastName());
+				newStudent.setPhoneNumber(student.getPhoneNumber());
+				newStudent.setCourse(student.getCourse());
+				newStudent.setSemester(student.getSemester());
+				newStudent.setFaceEntityId(student.getFaceEntityId());
+				newStudent.setId(studentId);
+
+				studentCrud.save(newStudent);
 				return new CommonResponse("Student added successfully",Constants.COMMON_RESP_SUCCESS);
 			}
 		} catch (Exception e) {
@@ -48,14 +66,14 @@ public class StudentController {
 	@PostMapping("/update_student")
 	@CrossOrigin(origins = "http://localhost:3000")
 	CommonResponse updateStudent(@RequestBody StudentModel student) {
-		studentCrud.save(student);
+		//studentCrud.save(student);
 		return new CommonResponse();
 	}
 	
 	@PostMapping("/delete_student")
 	@CrossOrigin(origins = "http://localhost:3000")
 	CommonResponse deleteStudent(@RequestBody StudentModel student) {
-		studentCrud.delete(student);
+		//studentCrud.deleteById(student.getFaceEntityId());
 		return new CommonResponse();
 	}
 	

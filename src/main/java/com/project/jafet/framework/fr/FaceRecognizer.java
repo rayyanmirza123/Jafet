@@ -32,6 +32,7 @@ import com.project.jafet.framework.fr.model.TestRequestModel;
 import com.project.jafet.framework.fr.model.utils.FaceRecognizerResponse;
 import com.project.jafet.framework.fr.util.FaceRecognizerUtils;
 import com.project.jafet.framework.req.model.AddUserRequest;
+import com.project.jafet.framework.req.model.AttendanceModel;
 import com.project.jafet.framework.req.model.StudentModel;
 import com.project.jafet.framework.services.ImageProcessor;
 
@@ -162,6 +163,17 @@ public class FaceRecognizer {
 		}
 	}
 	
+	public static FaceRecognizerResponse recognize(AttendanceModel attnModel) throws FaceRecognizerException {
+		try {
+            File inputFile = ImageProcessor.convertBase64ToFile(attnModel.getImages().get(0));
+			Mat imgMat = imread(inputFile.getAbsolutePath());
+			return haarCascade(imgMat);
+		}catch(Exception e) {
+			e.printStackTrace();
+			throw new FaceRecognizerException("Error occured while recognizing "+e.getMessage());
+		}
+	}
+	
 	public static FaceRecognizerResponse recognize(StudentModel studentModel) throws FaceRecognizerException {
 		try {
             File inputFile = ImageProcessor.convertBase64ToFile(studentModel.getImages().get(0));
@@ -225,7 +237,7 @@ public class FaceRecognizer {
 	        int recognizedUserId = label.get(0);
 	        double confidenceValue = confidence.get(0);
 	        
-	        if(confidenceValue >= Constants.RECOGNITION_PRECISION) {
+	        if(confidenceValue <= Constants.RECOGNITION_PRECISION) {
 		        faceRecognizerResponse.setConfidenceValue(confidenceValue);
 		        faceRecognizerResponse.setLabelId(recognizedUserId);
 		        faceRecognizerResponse.setHaarDetectedImg(fileName);	

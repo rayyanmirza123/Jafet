@@ -11,6 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AttendanceModel {
 	
-	List<String> images;
+	public String classRoom;
+	
+	public String teacherId;
+	
+	public String subject;
+	
+	public List<String> images;
 
 }

@@ -9,21 +9,20 @@ import com.project.jafet.framework.fr.crud.FaceEntityCRUD;
 import com.project.jafet.framework.fr.model.FaceEntity;
 
 public class FaceEntityUtil {
-
-	@Autowired
-	FaceEntityCRUD faceEntityCrud;
 	
 	private static FaceEntityUtil faceEntityUtil;
+	
+	private static FaceEntityCRUD faceEntityCRUD;
 	
 	private FaceEntityUtil() {
 		
 	}
 	
-	public static FaceEntityUtil getFaceEntityUtil() {
+	public static FaceEntityUtil getFaceEntityUtil(FaceEntityCRUD faceEntityCRUDE) {
 		if(faceEntityUtil == null) {
 			faceEntityUtil = new FaceEntityUtil();
 		}
-		
+		faceEntityCRUD = faceEntityCRUDE;
 		return faceEntityUtil;
 	}
 	
@@ -36,9 +35,6 @@ public class FaceEntityUtil {
 			faceEntity.setEncodedImage(image);
 			faceEntities.add(faceEntity);
 		}
-		faceEntityCrud.saveAll(faceEntities);
-	}
-	
-	
-	
+		faceEntityCRUD.saveAll(faceEntities);
+	}	
 }
