@@ -1,5 +1,8 @@
 package com.project.jafet.framework.fr.model;
 
+import java.sql.Timestamp;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,8 +16,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "attendance")
 public class Attendance {
-	  @Id
-	  @GeneratedValue(strategy = GenerationType.AUTO)
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer attendanceId;
 	
 	private String rollNumber;
@@ -25,6 +28,11 @@ public class Attendance {
 	
 	private String studentId;
 	
+	private String semester;
+	
 	private String subject;
+	
+	@Column(name="on", columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private Timestamp  on;
 
 }

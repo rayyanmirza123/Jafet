@@ -9,8 +9,24 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-public class StudentModel extends com.project.jafet.framework.fr.model.Student {
+public class StudentModel {
+		  
+	public String firstName;
+	  
+	public String lastName;
 	
+	public String emailId;
+	
+	public String phoneNumber;
+	
+	public String faceEntityId;
+	
+	public String semester;
+	
+	public String course;
+	
+	public String classRoom;
+
 	public List<String> images;
 
 }
