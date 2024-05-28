@@ -279,12 +279,12 @@ public class FaceRecognizer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
+			faceRecognizer.train(faceImageVectors, matLabelBuffer);
+		}else {
+	        faceRecognizer.read(Constants.TRAINED_MODEL);
+	        faceRecognizer.update(faceImageVectors, matLabelBuffer);	
 		}
-		
-        faceRecognizer.read(Constants.TRAINED_MODEL);
-
-        
-        faceRecognizer.update(faceImageVectors, matLabelBuffer);
         faceRecognizer.save(Constants.TRAINED_MODEL);
 	}
 }
