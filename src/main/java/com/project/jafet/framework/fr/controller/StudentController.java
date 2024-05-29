@@ -36,7 +36,7 @@ public class StudentController {
 	CommonResponse addStudent(@RequestBody StudentModel student) {
 		Integer studentId = SequenceUtil.getSequencer(sequenceCrud).getNextSeq(Constants.STUDENT_SEQ);
 		try {
-			boolean isSuccess = FaceRecognizer.updateModelAddUserWithLabel(student.images, studentId);
+			boolean isSuccess = FaceRecognizer.updateModelAddUserWithLabel(student.image, studentId);
 			if(isSuccess) {
 	//			FaceEntityUtil.getFaceEntityUtil(faceEntityCrud).saveFaceEntity(student.getImages(), studentId, student.getFirstName());
 				student.setFaceEntityId(String.valueOf(studentId));

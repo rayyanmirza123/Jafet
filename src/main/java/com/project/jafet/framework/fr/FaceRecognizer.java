@@ -119,17 +119,15 @@ public class FaceRecognizer {
 		}
 	}
 	
-	public static boolean updateModelAddUserWithLabel(List<String> images64, int label) throws Exception {
+	public static boolean updateModelAddUserWithLabel(String image64, int label) throws Exception {
 		try {
 			List<Mat> images = new ArrayList<>();
 			List<Integer> labels = new ArrayList<>();
-			for(String image64 : images64) {
-				File inputFile = ImageProcessor.convertBase64ToFile(image64);
-				Mat imgMat = imread(inputFile.getAbsolutePath(), IMREAD_GRAYSCALE);
-				images.add(imgMat);
-				labels.add(label);
-				inputFile.delete();
-			}
+			File inputFile = ImageProcessor.convertBase64ToFile(image64);
+			Mat imgMat = imread(inputFile.getAbsolutePath(), IMREAD_GRAYSCALE);
+			images.add(imgMat);
+			labels.add(label);
+			inputFile.delete();
 			updateModelWithHaarCascade(images, labels);
 		}catch(Exception e) {
 			throw new AddFacialDataException("Error adding facial data "+e.getMessage());
@@ -176,7 +174,7 @@ public class FaceRecognizer {
 	
 	public static FaceRecognizerResponse recognize(StudentModel studentModel) throws FaceRecognizerException {
 		try {
-            File inputFile = ImageProcessor.convertBase64ToFile(studentModel.getImages().get(0));
+            File inputFile = ImageProcessor.convertBase64ToFile(studentModel.getImage());
 			Mat imgMat = imread(inputFile.getAbsolutePath());
 			return haarCascade(imgMat);
 		}catch(Exception e) {
@@ -201,30 +199,7 @@ public class FaceRecognizer {
         RectVector faces = new RectVector();
         // Find the faces in the frame:
         face_cascade.detectMultiScale(videoMatGray, faces); 
-        
-        int size = (int) faces.size();
-        
-        MatVector images = new MatVector(size);
-        Mat labels = new Mat(size, 1, CV_32SC1);
-        
-        IntBuffer labelsBuf = labels.createBuffer();
-        
-        for(int i = 0; i < faces.size(); i++) {
-        	Rect faceRect = faces.get(i);
-        	Mat faceImg = new Mat(videoMatGray, faceRect);
-        	images.put(i,faceImg);
-        	labelsBuf.put(i,1000);
-        }
-        
-        faceRecognizer.train(images, labels);
-        
         String fileName = FaceRecognizerUtils.getRandomFileName();
-        
-        for(int i =0; i < images.size(); i++) {
-        	Mat img = images.get(i);
-        	org.bytedeco.opencv.global.opencv_imgproc.rectangle(img, faces.get(i), new Scalar(0, 255, 0, 1));
-        	org.bytedeco.opencv.global.opencv_imgcodecs.imwrite(fileName, img);
-        }
         
         for(int i=0; i < faces.size(); i++) {
             Rect face_i = faces.get(i);

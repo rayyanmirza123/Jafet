@@ -1,5 +1,6 @@
 package com.project.jafet.framework.fr.util;
 
+import com.project.jafet.framework.Constants;
 import com.project.jafet.framework.fr.crud.SequenceCRUD;
 import com.project.jafet.framework.fr.model.Sequence;
 
@@ -27,7 +28,7 @@ public class SequenceUtil {
 		
 		int label = sequence.getValue();
 		
-		sequence.setValue(label+10);
+		sequence.setValue(label	+	Constants.INC);
 		
 		sequenceCrud.save(sequence);
 		

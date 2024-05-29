@@ -67,7 +67,7 @@ public class UtilController {
 	public ReportModel reports(@RequestBody ReportRequest reportRequest){
 		Attendance attendance = new Attendance();
 		if(reportRequest.getDate() != null) {
-			attendance.setOn(reportRequest.getDate());
+			attendance.setTakenAt(reportRequest.getDate());
 		}
 		if(reportRequest.getLass() != null) {
 			attendance.setClassRoom(reportRequest.getLass());
@@ -87,7 +87,7 @@ public class UtilController {
 				attData.rollNo = String.valueOf(fStd.getRollNumber());
 				attData.name = fStd.getFirstName() + fStd.getLastName();
 				attData.lass = fStd.getCourse();
-				attData.date = attn.getOn().toString();
+				attData.date = attn.getTakenAt().toString();
 				attDatas.add(attData);
 			}
 		}
