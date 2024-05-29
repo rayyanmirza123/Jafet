@@ -20,6 +20,8 @@ public class Constants {
 	
 	public static final String STUDENT_NOT_FOUND = "STUDENT_NOT_FOUND";
 	
+	public static final Integer INC = 1;
+	
 	public static final String IMG_EXT = "png";
 	
 	public static final String IMG_PREFIX = "HAAR_DETECTED_FACE_";

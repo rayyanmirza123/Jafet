@@ -26,15 +26,13 @@ public class FaceEntityUtil {
 		return faceEntityUtil;
 	}
 	
-	public void saveFaceEntity(List<String> images, Integer label, String name) {
+	public void saveFaceEntity(String image, Integer label, String name) {
 		List<FaceEntity> faceEntities = new ArrayList<>();
-		for(String image : images) {
-			FaceEntity faceEntity = new FaceEntity();
-			faceEntity.setLabel(label);
-			faceEntity.setName(name);
-			faceEntity.setEncodedImage(image);
-			faceEntities.add(faceEntity);
-		}
+		FaceEntity faceEntity = new FaceEntity();
+		faceEntity.setLabel(label);
+		faceEntity.setName(name);
+		faceEntity.setEncodedImage(image);
+		faceEntities.add(faceEntity);
 		faceEntityCRUD.saveAll(faceEntities);
 	}	
 }

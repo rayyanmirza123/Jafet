@@ -32,7 +32,7 @@ public class Attendance {
 	
 	private String subject;
 	
-	@Column(name="on", columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Timestamp  on;
+	@Column(name="takenAt", columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private Timestamp  takenAt;
 
 }
